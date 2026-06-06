@@ -48,8 +48,13 @@ exports.handler = async (event) => {
   const name    = (meta.name    || '').trim();
   const email   = (meta.email   || '').trim();
   const company = (meta.company || '').trim();
-  const phone   = (meta.phone   || '').trim();
   const url     = (meta.url     || '').trim();
+
+  // ClickUp phone field requires E.164: strip everything except leading + and digits.
+  // Only pass the custom field if the result starts with + (has a country code).
+  const rawPhone = (meta.phone || '').trim();
+  const e164Phone = ('+' + rawPhone.replace(/[^\d]/g, '')).replace(/^\+0/, '+'); // drop leading zero after +
+  const phoneForField = e164Phone.length > 4 && rawPhone.includes('+') ? e164Phone : null;
 
   const totalLeak = computed.total
     ? '$' + Math.round(computed.total).toLocaleString()
@@ -64,18 +69,43 @@ exports.handler = async (event) => {
 
   const taskName = (company || name || 'Unknown') + ' · Diagnostic Lead — ' + totalLeak + '/yr';
 
+  const description = [
+    '## Contact',
+    `Name: ${name || '—'}`,
+    `Email: ${email || '—'}`,
+    `Phone: ${rawPhone || '—'}`,
+    `Company: ${company || '—'}`,
+    `Website: ${url || '—'}`,
+    '',
+    '## Diagnostic',
+    `Annual leak estimate: ${totalLeak}`,
+    `Industry: ${answers.industry || '—'}`,
+    `Top priority: ${answers.priority || '—'}`,
+    `Timeline: ${timeline}`,
+    '',
+    '## Breakdown',
+    `Lead capture: $${Math.round(computed.capture || 0).toLocaleString()}/yr`,
+    `Lead conversion: $${Math.round(computed.convert || 0).toLocaleString()}/yr`,
+    `Manual ops: $${Math.round(computed.manual_ops || 0).toLocaleString()}/yr`,
+    `Data visibility: $${Math.round(computed.visibility || 0).toLocaleString()}/yr`,
+    `Tool sprawl: $${Math.round(computed.tools || 0).toLocaleString()}/yr`,
+    '',
+    'Source: suki-systems.com/diagnostic',
+  ].join('\n');
+
   // Build custom_fields array — skip fields with no value
   const customFields = [
     { id: FIELDS.name,         value: name },
     { id: FIELDS.company_name, value: company },
     { id: FIELDS.email,        value: email },
-    { id: FIELDS.phone,        value: phone },
+    { id: FIELDS.phone,        value: phoneForField },
     { id: FIELDS.source,       value: 'diagnostic' },
     { id: FIELDS.website,      value: url },
   ].filter(f => f.value);
 
   const task = {
     name: taskName,
+    description,
     status: 'in progress',
     priority,
     start_date: Date.now(),
