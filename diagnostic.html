@@ -422,6 +422,25 @@ footer .meta {
   text-transform: uppercase; color: var(--steel); margin-bottom: 8px;
 }
 
+/* Phone prefix picker */
+.phone-row {
+  display: flex; gap: 8px; align-items: stretch;
+}
+.phone-prefix {
+  flex-shrink: 0;
+  padding: 14px 10px;
+  background: #fff; border: 1px solid var(--line);
+  border-radius: 4px; font: inherit; font-size: 14px;
+  color: var(--ink); cursor: pointer;
+  appearance: none; -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231A2332' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat: no-repeat; background-position: right 8px center;
+  background-size: 13px;
+  padding-right: 28px;
+}
+.phone-prefix:focus { outline: none; border-color: var(--ink); }
+.phone-row .input { flex: 1; }
+
 .audit-actions {
   display: flex; justify-content: space-between; align-items: center;
   gap: 16px; padding-top: 24px; border-top: 1px solid var(--line-soft);
@@ -1087,7 +1106,41 @@ document.addEventListener('DOMContentLoaded', function() {
           </div>
           <div class="full">
             <label class="input-label">Phone *</label>
-            <input type="tel" class="input" id="gatePhone" placeholder="+1 555 0123" />
+            <div class="phone-row">
+              <select class="phone-prefix" id="gatePhonePrefix">
+                <option value="+972">🇮🇱 +972</option>
+                <option value="+1">🇺🇸 +1</option>
+                <option value="+44">🇬🇧 +44</option>
+                <option value="+61">🇦🇺 +61</option>
+                <option value="+1-CA">🇨🇦 +1</option>
+                <option value="+971">🇦🇪 +971</option>
+                <option value="+49">🇩🇪 +49</option>
+                <option value="+33">🇫🇷 +33</option>
+                <option value="+31">🇳🇱 +31</option>
+                <option value="+34">🇪🇸 +34</option>
+                <option value="+39">🇮🇹 +39</option>
+                <option value="+41">🇨🇭 +41</option>
+                <option value="+46">🇸🇪 +46</option>
+                <option value="+47">🇳🇴 +47</option>
+                <option value="+45">🇩🇰 +45</option>
+                <option value="+48">🇵🇱 +48</option>
+                <option value="+7">🇷🇺 +7</option>
+                <option value="+90">🇹🇷 +90</option>
+                <option value="+27">🇿🇦 +27</option>
+                <option value="+20">🇪🇬 +20</option>
+                <option value="+966">🇸🇦 +966</option>
+                <option value="+965">🇰🇼 +965</option>
+                <option value="+974">🇶🇦 +974</option>
+                <option value="+91">🇮🇳 +91</option>
+                <option value="+65">🇸🇬 +65</option>
+                <option value="+81">🇯🇵 +81</option>
+                <option value="+82">🇰🇷 +82</option>
+                <option value="+55">🇧🇷 +55</option>
+                <option value="+52">🇲🇽 +52</option>
+                <option value="+54">🇦🇷 +54</option>
+              </select>
+              <input type="tel" class="input" id="gatePhoneNumber" placeholder="50 000 0000" />
+            </div>
           </div>
           <div class="full">
             <label class="input-label">Company URL (optional · we'll scan it for sharper findings)</label>
@@ -1805,7 +1858,9 @@ function submitGate() {
   const name = document.getElementById('gateName').value.trim();
   const email = document.getElementById('gateEmail').value.trim();
   const company = document.getElementById('gateCompany').value.trim();
-  const phone = document.getElementById('gatePhone').value.trim();
+  const prefix = (document.getElementById('gatePhonePrefix').value || '').replace('-CA', '');
+  const phoneNum = document.getElementById('gatePhoneNumber').value.trim().replace(/^0+/, ''); // strip leading zero
+  const phone = phoneNum ? prefix + phoneNum : '';
   let url = document.getElementById('gateUrl').value.trim();
   const errEl = document.getElementById('gateError');
   errEl.classList.remove('show');
@@ -1827,7 +1882,7 @@ function submitGate() {
     if (window.suki) window.suki('diagnostic_gate_submit_error', { reason: 'invalid_email' });
     return;
   }
-  if (!phone) {
+  if (!phoneNum) {
     errEl.innerHTML = 'Please enter your phone number.';
     errEl.classList.add('show');
     return;
@@ -2482,6 +2537,37 @@ function renderCharts(m, categories, aiScores, finalSystems, recovEstimate) {
   document.getElementById('recoveryFoot').innerHTML =
     `The dotted curve assumes the three systems ship in weeks 0 – 3, then leak drops to ~30% of today's run-rate. By <strong>month 36</strong>, the gap between the two paths is roughly <strong>${fmtMoneyExact(recoveredAt36)}</strong> recovered.`;
 }
+</script>
+
+<script>
+/* Auto-select phone prefix based on browser timezone */
+(function() {
+  const TZ_TO_PREFIX = {
+    'Asia/Jerusalem':'972','Asia/Tel_Aviv':'972',
+    'America/New_York':'1','America/Chicago':'1','America/Denver':'1','America/Los_Angeles':'1',
+    'America/Toronto':'1-CA','America/Vancouver':'1-CA',
+    'Europe/London':'44','Europe/Berlin':'49','Europe/Paris':'33',
+    'Europe/Amsterdam':'31','Europe/Madrid':'34','Europe/Rome':'39',
+    'Europe/Zurich':'41','Europe/Stockholm':'46','Europe/Oslo':'47',
+    'Europe/Copenhagen':'45','Europe/Warsaw':'48',
+    'Australia/Sydney':'61','Australia/Melbourne':'61','Australia/Perth':'61',
+    'Asia/Dubai':'971','Asia/Riyadh':'966','Asia/Kuwait':'965','Asia/Qatar':'974',
+    'Asia/Kolkata':'91','Asia/Singapore':'65','Asia/Tokyo':'81','Asia/Seoul':'82',
+    'America/Sao_Paulo':'55','America/Mexico_City':'52','America/Argentina/Buenos_Aires':'54',
+    'Africa/Johannesburg':'27','Africa/Cairo':'20','Europe/Istanbul':'90',
+  };
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const code = TZ_TO_PREFIX[tz];
+    if (code) {
+      const sel = document.getElementById('gatePhonePrefix');
+      if (sel) {
+        const match = Array.from(sel.options).find(o => o.value === '+' + code);
+        if (match) sel.value = match.value;
+      }
+    }
+  } catch(e) {}
+})();
 </script>
 
 </body>
