@@ -1316,7 +1316,8 @@ document.addEventListener('DOMContentLoaded', function() {
      Never put it in this file — the browser would expose it.
    ============================================================ */
 const AI_ENDPOINT = 'https://hook.us2.make.com/z278ci2ks143d9kdplbe9bsyvrrnz9b1';
-const AI_TIMEOUT_MS = 35000;   // give up after 35s, show local-only (Firecrawl + Claude + ClickUp)
+const AI_TIMEOUT_MS = 35000;   // give up after 35s, show local-only (Firecrawl + Claude)
+const CRM_ENDPOINT = '/.netlify/functions/submit-lead';
 
 /* ============================================================
    ONE-DIAGNOSTIC-PER-EMAIL LOCK
@@ -1866,8 +1867,9 @@ function startScanning() {
   // Local compute is instant — it's the truth, even if no AI runs.
   const localResult = compute();
 
-  // Fire AI fetch in parallel (no-op if not configured)
+  // Fire AI fetch + CRM push in parallel (both fire-and-forget if not configured)
   const aiPromise = fetchAIEnrichment(localResult);
+  pushToCRM(localResult); // non-blocking — we don't wait on CRM before showing results
 
   // Step animation — independent of the network call so the UI feels
   // alive even if the AI is fast or slow. Steps advance every ~1.4s.
@@ -1907,6 +1909,40 @@ function startScanning() {
       setView('view-results');
     }, 600);
   });
+}
+
+async function pushToCRM(localResult) {
+  if (!CRM_ENDPOINT) return;
+  const payload = {
+    meta: {
+      name:    answers._name,
+      email:   answers._email,
+      company: answers._company,
+      phone:   answers._phone,
+      url:     answers._url
+    },
+    answers: Object.fromEntries(
+      Object.entries(answers).filter(([k]) => !k.startsWith('_'))
+    ),
+    computed: {
+      capture:    localResult.capture,
+      convert:    localResult.convert,
+      manual_ops: localResult.manual_ops,
+      visibility: localResult.visibility,
+      tools:      localResult.tools,
+      total:      localResult.total,
+      capped:     localResult.capped
+    }
+  };
+  try {
+    await fetch(CRM_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+  } catch (err) {
+    console.warn('CRM push failed silently:', err);
+  }
 }
 
 async function fetchAIEnrichment(localResult) {
