@@ -1074,19 +1074,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
         <div class="gate-grid">
           <div>
-            <label class="input-label">First name</label>
+            <label class="input-label">First name *</label>
             <input type="text" class="input" id="gateName" placeholder="Sam" />
           </div>
           <div>
-            <label class="input-label">Company</label>
+            <label class="input-label">Company *</label>
             <input type="text" class="input" id="gateCompany" placeholder="Acme Roofing" />
           </div>
           <div class="full">
-            <label class="input-label">Work email</label>
+            <label class="input-label">Work email *</label>
             <input type="email" class="input" id="gateEmail" placeholder="sam@acmeroofing.com" />
           </div>
           <div class="full">
-            <label class="input-label">Phone (optional)</label>
+            <label class="input-label">Phone *</label>
             <input type="tel" class="input" id="gatePhone" placeholder="+1 555 0123" />
           </div>
           <div class="full">
@@ -1811,10 +1811,25 @@ function submitGate() {
   errEl.classList.remove('show');
   if (window.suki) window.suki('diagnostic_gate_submit_attempt');
 
+  if (!name) {
+    errEl.innerHTML = 'Please enter your first name.';
+    errEl.classList.add('show');
+    return;
+  }
+  if (!company) {
+    errEl.innerHTML = 'Please enter your company name.';
+    errEl.classList.add('show');
+    return;
+  }
   if (!email || !email.includes('@')) {
     errEl.innerHTML = 'Please enter a valid work email.';
     errEl.classList.add('show');
     if (window.suki) window.suki('diagnostic_gate_submit_error', { reason: 'invalid_email' });
+    return;
+  }
+  if (!phone) {
+    errEl.innerHTML = 'Please enter your phone number.';
+    errEl.classList.add('show');
     return;
   }
 

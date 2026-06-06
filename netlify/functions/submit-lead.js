@@ -110,6 +110,7 @@ exports.handler = async (event) => {
     priority,
     start_date: Date.now(),
     start_date_time: true,
+    assignees: [306777577], // Yali Reichental
     tags: ['qualifying lead', 'source diagnostic'],
     custom_fields: customFields,
   };
