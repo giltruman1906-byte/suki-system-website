@@ -67,7 +67,13 @@ exports.handler = async (event) => {
     : timeline === '90d' ? 2
     : 3;
 
-  const taskName = (company || name || 'Unknown') + ' · Diagnostic Lead — ' + totalLeak + '/yr';
+  // Headline: prefer domain > company name > full name
+  let headline = company;
+  if (!headline && url) {
+    try { headline = new URL(url).hostname.replace(/^www\./, ''); } catch (e) {}
+  }
+  if (!headline) headline = name || 'Unknown';
+  const taskName = headline + ' · Diagnostic Lead — ' + totalLeak + '/yr';
 
   const description = [
     '## Contact',

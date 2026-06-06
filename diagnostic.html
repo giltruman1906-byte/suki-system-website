@@ -1890,7 +1890,7 @@ function submitGate() {
 
   // One diagnostic per email — frontend lock (backend enforces too).
   if (hasSubmitted(email)) {
-    errEl.innerHTML = `We already sent your diagnostic to <strong>${email}</strong>. Check your inbox — the report landed within seconds. If you can't find it, hit reply to <a href="mailto:yali@suki-systems.com">yali@suki-systems.com</a> and we'll resend it. One diagnostic per email, on purpose.`;
+    errEl.innerHTML = `We already have a diagnostic on file for <strong>${email}</strong>. Reach out to <a href="mailto:yali@suki-systems.com">yali@suki-systems.com</a> and we'll pull it up for you.`;
     errEl.classList.add('show');
     if (window.suki) window.suki('diagnostic_gate_submit_error', { reason: 'duplicate_email' });
     return;
@@ -1911,7 +1911,7 @@ function submitGate() {
   if (window.suki) window.suki('diagnostic_gate_submit_success', { has_phone: !!phone, has_url: !!url });
 
   // Transition: gate → scanning → results
-  startScanning();
+  startScanning({ name, email, company, phone, url });
 }
 
 /* ============================================================
@@ -1921,11 +1921,11 @@ function submitGate() {
    ============================================================ */
 let aiEnrichment = null;
 
-function startScanning() {
+function startScanning(meta) {
   // Domain in headline
-  let domainText = answers._company || 'your business';
-  if (answers._url) {
-    try { domainText = new URL(answers._url).hostname.replace(/^www\./, ''); } catch (e) {}
+  let domainText = meta.company || 'your business';
+  if (meta.url) {
+    try { domainText = new URL(meta.url).hostname.replace(/^www\./, ''); } catch (e) {}
   }
   document.getElementById('scanDomain').textContent = domainText;
 
@@ -1939,7 +1939,7 @@ function startScanning() {
 
   // Fire AI fetch + CRM push in parallel (both fire-and-forget if not configured)
   const aiPromise = fetchAIEnrichment(localResult);
-  pushToCRM(localResult); // non-blocking — we don't wait on CRM before showing results
+  pushToCRM(meta, localResult); // non-blocking — we don't wait on CRM before showing results
 
   // Step animation — independent of the network call so the UI feels
   // alive even if the AI is fast or slow. Steps advance every ~1.4s.
@@ -1981,15 +1981,15 @@ function startScanning() {
   });
 }
 
-async function pushToCRM(localResult) {
+async function pushToCRM(meta, localResult) {
   if (!CRM_ENDPOINT) return;
   const payload = {
     meta: {
-      name:    answers._name,
-      email:   answers._email,
-      company: answers._company,
-      phone:   answers._phone,
-      url:     answers._url
+      name:    meta.name,
+      email:   meta.email,
+      company: meta.company,
+      phone:   meta.phone,
+      url:     meta.url
     },
     answers: Object.fromEntries(
       Object.entries(answers).filter(([k]) => !k.startsWith('_'))
