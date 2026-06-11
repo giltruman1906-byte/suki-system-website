@@ -14,3 +14,6 @@
 index.backup-*.html
 index.live-fetched.html
 index.live.html
+.vercel
+.env*
+creative/videos/
