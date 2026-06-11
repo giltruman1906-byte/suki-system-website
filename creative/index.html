@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="Suki Studios — AI UGC + Meta Ads performance creative. Ads people actually watch." />
+  <meta name="theme-color" content="#0a0908" />
+  <title>Suki Studios — AI UGC + Meta Ads</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900,0..100;1,9..144,300..900,0..100&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <!-- eager-prefetch the first 4 reels so they're cached before JS even runs -->
+  <link rel="preload" as="video" href="videos/17.mp4" type="video/mp4" />
+  <link rel="preload" as="video" href="videos/5.mp4" type="video/mp4" />
+  <link rel="preload" as="video" href="videos/11.mp4" type="video/mp4" />
+  <link rel="preload" as="video" href="videos/4.mp4" type="video/mp4" />
+  <style>
+    :root {
+      --ink: #0a0908;
+      --ink-rise: #131110;
+      --letterbox: #050403;
+      --bone: #f1e8d4;
+      --bone-soft: rgba(241, 232, 212, 0.62);
+      --bone-faint: rgba(241, 232, 212, 0.28);
+      --bone-whisper: rgba(241, 232, 212, 0.10);
+      --rec: #ff2e2a;
+      --rec-glow: rgba(255, 46, 42, 0.45);
+      --display: "Fraunces", "Times New Roman", serif;
+      --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      --gut: clamp(20px, 4vw, 56px);
+      --ease: cubic-bezier(.7, 0, .2, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      scroll-behavior: smooth;
+      background: var(--ink);
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      background: var(--ink);
+      color: var(--bone);
+      font-family: var(--display);
+      font-weight: 300;
+      line-height: 1.4;
+      overflow-x: hidden;
+      min-height: 100vh;
+      position: relative;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* film grain removed for performance */
+
+    .scroll-progress {
+      position: fixed;
+      top: 0; left: 0;
+      height: 1px;
+      background: var(--rec);
+      width: 0%;
+      z-index: 100;
+      box-shadow: 0 0 8px var(--rec-glow);
+    }
+
+    ::selection { background: var(--rec); color: var(--ink); }
+
+    /* ============================================================
+       TOP BAR
+    ============================================================ */
+    .top-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      padding: 28px var(--gut) 0;
+      z-index: 60;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      pointer-events: none;
+    }
+    .top-bar > * { pointer-events: auto; }
+
+    .wordmark {
+      font-family: var(--display);
+      font-size: 22px;
+      font-weight: 400;
+      letter-spacing: -0.015em;
+      line-height: 1.1;
+      color: var(--bone);
+      text-shadow: 0 2px 16px rgba(0,0,0,0.55);
+    }
+    .wordmark em {
+      font-style: italic;
+      font-weight: 300;
+      font-variation-settings: "SOFT" 100;
+      color: var(--bone-soft);
+    }
+    .wordmark-sub {
+      display: block;
+      font-family: var(--mono);
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.3em;
+      color: var(--bone-faint);
+      margin-top: 8px;
+    }
+
+    .top-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 2px;
+    }
+
+    .feed-counter {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--bone);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 14px;
+      background: rgba(10, 9, 8, 0.78);
+      border: 1px solid var(--bone-whisper);
+    }
+    .feed-counter .dot {
+      width: 7px; height: 7px;
+      background: var(--rec);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--rec-glow);
+      animation: blink 1.4s ease-in-out infinite;
+    }
+    .feed-counter .current { color: var(--bone); }
+    .feed-counter .sep, .feed-counter .total { color: var(--bone-faint); }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+
+    .icon-btn {
+      width: 44px;
+      height: 44px;
+      background: rgba(10, 9, 8, 0.78);
+      border: 1px solid var(--bone-whisper);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      color: var(--bone);
+      transition: border-color 0.3s var(--ease), background 0.3s var(--ease), color 0.3s var(--ease);
+      flex-shrink: 0;
+      padding: 0;
+    }
+    .icon-btn:hover { border-color: var(--bone-soft); background: rgba(20, 18, 16, 0.9); }
+    .icon-btn svg { width: 18px; height: 18px; display: block; }
+
+    .sound-toggle .ico-on { display: none; }
+    .sound-toggle[data-on="true"] .ico-off { display: none; }
+    .sound-toggle[data-on="true"] .ico-on { display: block; }
+    .sound-toggle[data-on="true"] { color: var(--rec); border-color: rgba(255, 46, 42, 0.35); }
+
+    /* Hamburger */
+    .hamburger { position: relative; }
+    .hamburger span {
+      position: absolute;
+      display: block;
+      width: 18px;
+      height: 1px;
+      background: var(--bone);
+      transition: transform 0.55s var(--ease), opacity 0.3s, width 0.4s var(--ease);
+    }
+    .hamburger span:nth-child(1) { transform: translateY(-5px); }
+    .hamburger span:nth-child(2) { width: 12px; }
+    .hamburger span:nth-child(3) { transform: translateY(5px); width: 14px; }
+    body.menu-open .hamburger span:nth-child(1) { transform: rotate(45deg); width: 18px; }
+    body.menu-open .hamburger span:nth-child(2) { opacity: 0; }
+    body.menu-open .hamburger span:nth-child(3) { transform: rotate(-45deg); width: 18px; }
+
+    @media (max-width: 560px) {
+      .wordmark { font-size: 18px; }
+      .feed-counter { padding: 10px 12px; font-size: 9px; }
+      .icon-btn { width: 40px; height: 40px; }
+    }
+
+    /* ============================================================
+       PIPS
+    ============================================================ */
+    .pips {
+      position: fixed;
+      right: 22px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      pointer-events: none;
+    }
+    .pip {
+      pointer-events: auto;
+      width: 1px;
+      height: 18px;
+      background: var(--bone-whisper);
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      transition: background 0.4s var(--ease), height 0.4s var(--ease), width 0.4s var(--ease);
+      display: block;
+    }
+    .pip:hover { background: var(--bone-soft); }
+    .pip.is-active {
+      background: var(--rec);
+      height: 28px;
+      width: 2px;
+      box-shadow: 0 0 8px var(--rec-glow);
+    }
+    @media (max-width: 720px) { .pips { display: none; } }
+
+    /* ============================================================
+       DRAWER
+    ============================================================ */
+    .drawer-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0, 0, 0, 0.72);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.55s var(--ease);
+      z-index: 70;
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+    }
+    body.menu-open .drawer-backdrop { opacity: 1; pointer-events: all; }
+
+    .drawer {
+      position: fixed;
+      inset: 0 0 0 auto;
+      width: min(460px, 100%);
+      background: var(--ink-rise);
+      border-left: 1px solid var(--bone-whisper);
+      transform: translateX(101%);
+      transition: transform 0.75s var(--ease);
+      z-index: 80;
+      padding: 96px 48px 40px;
+      display: flex;
+      flex-direction: column;
+    }
+    body.menu-open .drawer { transform: translateX(0); }
+
+    .drawer-meta {
+      font-family: var(--mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.24em;
+      color: var(--bone-faint);
+      margin-bottom: 56px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .drawer-meta::before { content: ''; width: 24px; height: 1px; background: var(--rec); }
+
+    .drawer nav { display: flex; flex-direction: column; }
+    .drawer nav button {
+      all: unset;
+      cursor: pointer;
+      display: flex;
+      align-items: baseline;
+      gap: 18px;
+      font-family: var(--display);
+      font-size: clamp(48px, 9vw, 80px);
+      font-weight: 300;
+      letter-spacing: -0.025em;
+      line-height: 1;
+      color: var(--bone);
+      padding: 22px 0;
+      border-bottom: 1px solid var(--bone-whisper);
+      transition: color 0.4s, padding-left 0.55s var(--ease);
+    }
+    .drawer nav button:first-child { border-top: 1px solid var(--bone-whisper); }
+    .drawer nav button:hover {
+      color: var(--rec);
+      padding-left: 20px;
+      font-style: italic;
+      font-variation-settings: "SOFT" 100;
+    }
+    .drawer nav button .num {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      color: var(--bone-faint);
+      font-style: normal !important;
+      font-variation-settings: normal !important;
+    }
+
+    .drawer-foot {
+      margin-top: auto;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--bone-faint);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      line-height: 2;
+      padding-top: 32px;
+    }
+    .drawer-foot strong {
+      display: block;
+      color: var(--bone);
+      font-weight: 400;
+      margin-bottom: 8px;
+    }
+    @media (max-width: 600px) { .drawer { padding: 96px 28px 32px; } }
+
+    /* ============================================================
+       ABOUT
+    ============================================================ */
+    .about {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 4, 3, 0.96);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      z-index: 200;
+      display: grid;
+      place-items: center;
+      padding: var(--gut);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s var(--ease);
+      overflow-y: auto;
+    }
+    body.about-open .about { opacity: 1; pointer-events: all; }
+    .about-card {
+      max-width: 680px;
+      width: 100%;
+      transform: translateY(20px);
+      transition: transform 0.75s var(--ease);
+    }
+    body.about-open .about-card { transform: translateY(0); }
+    .about-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.24em;
+      color: var(--rec);
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .about-label::before { content: ''; width: 24px; height: 1px; background: var(--rec); }
+    .about h2 {
+      font-family: var(--display);
+      font-size: clamp(40px, 6vw, 64px);
+      font-weight: 300;
+      letter-spacing: -0.025em;
+      line-height: 0.98;
+      margin-bottom: 40px;
+    }
+    .about h2 em { font-style: italic; font-variation-settings: "SOFT" 100; color: var(--bone-soft); }
+    .about p {
+      font-family: var(--display);
+      font-size: 17px;
+      line-height: 1.65;
+      color: var(--bone-soft);
+      margin-bottom: 20px;
+      max-width: 58ch;
+    }
+    .about .signoff {
+      margin-top: 36px;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--bone);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .about .signoff::before { content: ''; width: 32px; height: 1px; background: var(--bone); }
+    .about-close {
+      position: fixed;
+      top: 22px;
+      right: 22px;
+      width: 44px;
+      height: 44px;
+      background: transparent;
+      border: 1px solid var(--bone-whisper);
+      color: var(--bone);
+      cursor: pointer;
+      font-family: var(--mono);
+      font-size: 20px;
+      line-height: 1;
+      z-index: 210;
+      transition: all 0.3s;
+    }
+    .about-close:hover { border-color: var(--rec); color: var(--rec); transform: rotate(90deg); }
+
+    /* ============================================================
+       HERO — fixed 100vh stage with inner-scroll reel column
+    ============================================================ */
+    .hero {
+      position: relative;
+      height: 100vh;
+      height: 100dvh;
+      width: 100%;
+      overflow: hidden;
+      background: var(--letterbox);
+    }
+    /* red glow removed for performance */
+
+    /* The reel column is the inner scrollable container */
+    .reel-column {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translate3d(-50%, 0, 0);
+      height: 100%;
+      width: 56.25vh;   /* 9:16 of viewport height */
+      max-width: 100vw;
+      overflow-y: scroll;
+      overflow-x: hidden;
+      scroll-snap-type: y mandatory;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+      overscroll-behavior-y: auto;
+      z-index: 1;
+      will-change: scroll-position;
+      border-left: 1px solid var(--bone-whisper);
+      border-right: 1px solid var(--bone-whisper);
+    }
+    /* desktop with custom wheel handler: disable native snap so JS owns the scroll */
+    @media (pointer: fine) {
+      .reel-column { scroll-snap-type: none; }
+      .reel-slide { scroll-snap-align: none; }
+    }
+    .reel-column::-webkit-scrollbar { display: none; }
+
+    .reel-slide {
+      position: relative;
+      height: 100vh;
+      height: 100dvh;
+      scroll-snap-align: start;
+      overflow: hidden;
+      background: #000;
+      contain: layout paint style;
+      content-visibility: auto;
+      contain-intrinsic-size: 100vh 56vw;
+    }
+    .reel-slide video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      background: #000;
+    }
+    /* vignette removed for performance */
+
+    /* hero overlay only on first slide */
+    .hero-overlay {
+      position: absolute;
+      left: 22px;
+      right: 22px;
+      bottom: clamp(48px, 9vh, 96px);
+      z-index: 6;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      pointer-events: none;
+      animation: rise 1s var(--ease) 0.3s both;
+    }
+    .hero-overlay .tagline {
+      font-family: var(--display);
+      font-size: clamp(15px, 1.4vw, 19px);
+      font-weight: 300;
+      letter-spacing: -0.01em;
+      line-height: 1.35;
+      color: var(--bone);
+      text-shadow: 0 2px 20px rgba(0,0,0,0.85);
+    }
+    .hero-overlay .tagline em {
+      font-style: italic;
+      font-variation-settings: "SOFT" 100;
+      color: var(--bone);
+    }
+    .hero-overlay .scroll-cue {
+      font-family: var(--mono);
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.32em;
+      color: var(--bone);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      animation: pulse 2.6s ease-in-out infinite;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.8);
+    }
+    .hero-overlay .scroll-cue::after {
+      content: '';
+      width: 22px;
+      height: 1px;
+      background: linear-gradient(to right, var(--bone), transparent);
+    }
+    @keyframes pulse { 0%,100% { opacity: 0.6; } 50% { opacity: 1; } }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 720px) {
+      .reel-column { width: 100vw; }
+      .hero-overlay { bottom: clamp(40px, 7vh, 70px); }
+    }
+
+    /* slide caption — IG-style, bottom-left */
+    .slide-caption {
+      position: absolute;
+      left: 22px;
+      right: 22px;
+      bottom: clamp(28px, 6vh, 60px);
+      z-index: 6;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      pointer-events: none;
+      animation: rise 0.55s var(--ease) 0.15s both;
+    }
+    .cap-label {
+      font-family: var(--display);
+      font-size: clamp(15px, 1.4vw, 19px);
+      font-weight: 400;
+      letter-spacing: -0.005em;
+      color: var(--bone);
+      text-shadow: 0 2px 18px rgba(0,0,0,0.9);
+      line-height: 1.3;
+      max-width: 90%;
+    }
+    .cap-label em {
+      font-style: italic;
+      font-variation-settings: "SOFT" 100;
+      color: var(--bone-soft);
+    }
+    .cap-sub {
+      font-family: var(--mono);
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.22em;
+      color: var(--bone-faint);
+      text-shadow: 0 2px 12px rgba(0,0,0,0.85);
+    }
+    a.cap-label {
+      text-decoration: none;
+      cursor: pointer;
+      pointer-events: auto;
+      display: inline-block;
+      transition: color 0.3s var(--ease);
+    }
+    a.cap-label:hover, a.cap-label:hover em { color: var(--rec); }
+    .slide-caption { pointer-events: none; }
+    .slide-caption a.cap-label { pointer-events: auto; }
+
+    /* GPU promotion for smoother scroll + video composite */
+    .reel-slide { will-change: transform; }
+    .reel-slide video { transform: translateZ(0); -webkit-transform: translateZ(0); backface-visibility: hidden; }
+
+    /* ============================================================
+       MARQUEE DIVIDER
+    ============================================================ */
+    .marquee {
+      overflow: hidden;
+      padding: 26px 0;
+      border-top: 1px solid var(--bone-whisper);
+      border-bottom: 1px solid var(--bone-whisper);
+      background: var(--ink);
+    }
+    .marquee-inner {
+      display: flex;
+      gap: 56px;
+      white-space: nowrap;
+      animation: marquee 40s linear infinite;
+      font-family: var(--display);
+      font-size: clamp(36px, 6vw, 78px);
+      font-weight: 300;
+      letter-spacing: -0.025em;
+      color: var(--bone);
+      width: max-content;
+    }
+    .marquee-inner span { display: inline-flex; align-items: center; gap: 56px; }
+    .marquee-inner span::after { content: '✦'; color: var(--rec); font-size: 0.5em; }
+    .marquee-inner em { font-style: italic; color: var(--bone-soft); font-variation-settings: "SOFT" 100; }
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* ============================================================
+       CTA + FORM
+    ============================================================ */
+    .cta {
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding: 120px var(--gut) 80px;
+      position: relative;
+      display: grid;
+      place-items: center;
+    }
+    .cta-inner {
+      width: 100%;
+      max-width: 640px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .cta-eyebrow {
+      font-family: var(--mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.34em;
+      color: var(--rec);
+      margin-bottom: 44px;
+    }
+    .cta-eyebrow::before { content: '— '; }
+    .cta-eyebrow::after  { content: ' —'; }
+    .cta-title {
+      font-family: var(--display);
+      font-size: clamp(72px, 13vw, 188px);
+      font-weight: 300;
+      letter-spacing: -0.05em;
+      line-height: 0.86;
+      color: var(--bone);
+      margin: 0 0 28px;
+    }
+    .cta-title em { font-style: italic; font-variation-settings: "SOFT" 100; color: var(--bone-soft); }
+    .cta-line {
+      font-family: var(--display);
+      font-size: clamp(17px, 1.8vw, 22px);
+      font-weight: 300;
+      color: var(--bone-soft);
+      max-width: 36ch;
+      margin: 0 0 48px;
+      line-height: 1.45;
+    }
+    .cta-line em { font-style: italic; font-variation-settings: "SOFT" 100; color: var(--bone); }
+
+    .cta-form {
+      display: grid;
+      gap: 28px;
+      max-width: 520px;
+      width: 100%;
+      margin: 0 auto;
+      text-align: left;
+    }
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+    }
+    .field { display: flex; flex-direction: column; gap: 10px; }
+    .field-label {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--bone-faint);
+    }
+    .field input, .field textarea {
+      background: transparent;
+      border: 0;
+      border-bottom: 1px solid var(--bone-whisper);
+      font-family: var(--display);
+      font-size: clamp(16px, 1.5vw, 19px);
+      color: var(--bone);
+      padding: 10px 0 14px;
+      font-weight: 300;
+      resize: none;
+      transition: border-color 0.35s var(--ease);
+      width: 100%;
+      border-radius: 0;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .field textarea { line-height: 1.5; min-height: 92px; }
+    .field input:focus, .field textarea:focus { outline: none; border-color: var(--rec); }
+    .form-foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 24px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .form-hint {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--bone-faint);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      line-height: 1.7;
+      max-width: 32ch;
+    }
+    .hp { position: absolute; left: -9999px; opacity: 0; pointer-events: none; }
+
+    .cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px 32px;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--ink);
+      background: var(--bone);
+      text-decoration: none;
+      border: 1px solid var(--bone);
+      transition: color 0.45s var(--ease), border-color 0.45s var(--ease);
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .cta-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--rec);
+      transform: translateY(101%);
+      transition: transform 0.55s var(--ease);
+      z-index: 0;
+    }
+    .cta-btn > * { position: relative; z-index: 1; }
+    .cta-btn:hover { color: var(--bone); border-color: var(--rec); }
+    .cta-btn:hover::before { transform: translateY(0); }
+    .cta-btn .arrow { display: inline-block; transition: transform 0.45s var(--ease); }
+    .cta-btn:hover .arrow { transform: translateX(8px); }
+    .cta-btn[disabled] { opacity: 0.55; cursor: progress; }
+
+    .form-thanks {
+      font-family: var(--display);
+      font-size: clamp(22px, 2.6vw, 30px);
+      color: var(--bone);
+      max-width: 36ch;
+      margin: 0 auto;
+      line-height: 1.4;
+    }
+    .form-thanks em { font-style: italic; font-variation-settings: "SOFT" 100; color: var(--rec); }
+
+    .credits {
+      margin-top: 72px;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--bone-faint);
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      line-height: 2.4;
+      text-align: left;
+      border-top: 1px solid var(--bone-whisper);
+      padding-top: 28px;
+    }
+    .credits div span { color: var(--bone); }
+
+    .phone-row {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--bone-whisper);
+    }
+    .phone-prefix {
+      background: transparent;
+      border: none;
+      color: var(--bone-soft);
+      font-family: var(--mono);
+      font-size: 13px;
+      padding: 10px 4px 14px 0;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      flex-shrink: 0;
+    }
+    .phone-prefix:focus { outline: none; color: var(--bone); }
+    .phone-prefix option { background: #0a0908; color: #f1e8d4; }
+    .phone-row input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      font-family: var(--display);
+      font-size: clamp(16px, 1.5vw, 19px);
+      color: var(--bone);
+      padding: 10px 0 14px;
+      font-weight: 300;
+      width: 100%;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .phone-row input:focus { outline: none; }
+    .phone-row input { border-bottom: none; }
+
+    @media (max-width: 560px) {
+      .field-row { grid-template-columns: 1fr; gap: 22px; }
+      .form-foot { flex-direction: column-reverse; align-items: stretch; gap: 20px; }
+      .form-foot .cta-btn { justify-content: center; width: 100%; }
+      .form-hint { text-align: center; max-width: none; }
+    }
+
+    /* ============================================================
+       FOOTER
+    ============================================================ */
+    footer {
+      border-top: 1px solid var(--bone-whisper);
+      padding: 44px var(--gut) 36px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 32px;
+      align-items: end;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--bone-faint);
+    }
+    footer .col strong {
+      display: block;
+      color: var(--bone);
+      font-weight: 400;
+      margin-bottom: 8px;
+    }
+    footer a { color: var(--bone-soft); text-decoration: none; }
+    footer a:hover { color: var(--rec); }
+    footer .center { text-align: center; }
+    footer .right { text-align: right; }
+    @media (max-width: 720px) {
+      footer { grid-template-columns: 1fr; gap: 20px; }
+      footer .center, footer .right { text-align: left; }
+    }
+
+    :focus-visible { outline: 1px solid var(--rec); outline-offset: 4px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .reel-column { scroll-snap-type: none; }
+      body::before { animation: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="scroll-progress" id="progress"></div>
+
+  <!-- Top bar -->
+  <div class="top-bar">
+    <div class="wordmark">
+      Suki <em>Studios</em>
+      <span class="wordmark-sub">Est. MMXXVI · Perth WA</span>
+    </div>
+    <div class="top-right">
+      <div class="feed-counter" id="feedCounter" aria-live="polite">
+        <span class="dot"></span>
+        <span class="current" id="feedCurrent">01</span>
+        <span class="sep">/</span>
+        <span class="total" id="feedTotal">09</span>
+      </div>
+      <button class="icon-btn sound-toggle" id="soundToggle" data-on="false" aria-label="Turn sound on" type="button">
+        <svg class="ico-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true">
+          <path d="M11 5 L6 9 H3 V15 H6 L11 19 Z"/>
+          <line x1="16" y1="9" x2="21" y2="14"/>
+          <line x1="21" y1="9" x2="16" y2="14"/>
+        </svg>
+        <svg class="ico-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true">
+          <path d="M11 5 L6 9 H3 V15 H6 L11 19 Z"/>
+          <path d="M15 9 C17 10.5 17 13.5 15 15"/>
+          <path d="M18 6.5 C21 8.5 21 15.5 18 17.5"/>
+        </svg>
+      </button>
+      <button class="icon-btn hamburger" aria-label="Open menu" aria-expanded="false" id="hamburger" type="button">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Pip jump nav -->
+  <nav class="pips" id="pips" aria-label="Jump to slide"></nav>
+
+  <!-- Drawer -->
+  <div class="drawer-backdrop" id="backdrop"></div>
+  <aside class="drawer" aria-hidden="true" aria-label="Menu">
+    <div class="drawer-meta">Menu</div>
+    <nav>
+      <button type="button" data-action="contact"><span class="num">01</span>Contact</button>
+      <button type="button" data-action="about"><span class="num">02</span>About</button>
+    </nav>
+    <div class="drawer-foot">
+      <strong>Suki Studios</strong>
+      Perth, Western Australia
+    </div>
+  </aside>
+
+  <!-- About -->
+  <div class="about" id="about" aria-hidden="true" role="dialog" aria-label="About Suki Studios">
+    <button class="about-close" id="aboutClose" aria-label="Close about" type="button">×</button>
+    <div class="about-card">
+      <div class="about-label">About</div>
+      <h2>An AI performance-creative studio out of <em>Perth.</em></h2>
+      <p>We make AI UGC videos for Meta Ads. Quick to ship, easy to iterate, built around what's actually performing in your ad account.</p>
+      <p>Most engagements start as a 30-day pilot from AUD $2,500 — ten variants, run live in your account, weekly tweaks, a short report at the end.</p>
+      <p>Founded in 2026. A division of Suki Systems.</p>
+      <div class="signoff">Yali Reichental &amp; Gil Truman, Co-Founders</div>
+    </div>
+  </div>
+
+  <!-- =================== HERO REEL =================== -->
+  <section class="hero" id="reel">
+    <div class="reel-column" id="reelColumn">
+
+      <article class="reel-slide" data-idx="1">
+        <video id="firstVid" src="videos/17.mp4" autoplay muted loop playsinline preload="auto"></video>
+        <div class="hero-overlay">
+          <p class="tagline">
+            AI UGC + Meta Ads performance creative.<br/>
+            <em>Ads people actually watch.</em>
+          </p>
+          <div class="scroll-cue">Tap for sound · swipe for next</div>
+        </div>
+      </article>
+
+      <article class="reel-slide" data-idx="2">
+        <video data-src="videos/5.mp4" muted loop playsinline preload="auto"></video>
+        <div class="slide-caption">
+          <a class="cap-label" href="https://kivanacollective.com/" target="_blank" rel="noopener">Kivana Collective <em>· Underwear</em></a>
+          <span class="cap-sub">Editorial · autumn fashion · 02 / 18</span>
+        </div>
+      </article>
+
+      <article class="reel-slide" data-idx="3">
+        <video data-src="videos/11.mp4" muted loop playsinline preload="metadata"></video>
+        <div class="slide-caption">
+          <a class="cap-label" href="https://suki-systems.com" target="_blank" rel="noopener">Suki Systems <em>· Meta Ads</em></a>
+          <span class="cap-sub">AI avatar campaign · 03 / 18</span>
+        </div>
+      </article>
+
+      <article class="reel-slide" data-idx="3">
+        <video data-src="videos/4.mp4" muted loop playsinline preload="metadata"></video>
+        <div class="slide-caption">
+          <a class="cap-label" href="https://suki-systems.com" target="_blank" rel="noopener">Suki Systems <em>· Creative</em></a>
+          <span class="cap-sub">Cafe · morning amber · 04 / 18</span>
+        </div>
+      </article>
+
+      <article class="reel-slide" data-idx="4">
+        <video data-src="videos/14.mp4" muted loop playsinline preload="metadata"></video>
+        <div class="slide-caption">
+          <a class="cap-label" href="https://suki-systems.com" target="_blank" rel="noopener">Suki Systems <em>· UGC</em></a>
+          <span class="cap-sub">Trades · service B2B · 05 / 18</span>
+        </div>
+      </article>
+
+      <article class="reel-slide" data-idx="5">
+        <video data-src="videos/7.mp4" muted loop playsinline preload="metadata"></video>
+        <div class="slide-caption">
+          <a class="cap-label" href="https://clockin-scheduler.com/" target="_blank" rel="noopener">Clockin <em>· Rostering app</em></a>
+          <span class="cap-sub">Hospitality · fall menu · 06 / 18</span>
+        </div>
+      </article>
+
+      <article class="reel-slide" data-idx="6">
+        <video data-src="videos/16.mp4" muted loop playsinline preload="metadata"></video>
+        <div class="slide-caption">
+          <a class="cap-label" href="https://suki-systems.com" target="_blank" rel="noopener">Suki Systems <em>· Meta Ads</em></a>
+          <span class="cap-sub">Activewear · fall campaign · 07 / 18</span>
+        </div>
+      </article>
+
+      <article class="reel-slide" data-idx="7">
+        <video data-src="videos/1.mp4" muted loop playsinline preload="metadata"></video>
+        <div class="slide-caption">
+          <a class="cap-label" href="https://suki-systems.com" target="_blank" rel="noopener">Suki Systems <em>· Creative</em></a>
+          <span class="cap-sub">House origin · first cut · 08 / 18</span>
+        </div>
+      </article>
+
+      <article class="reel-slide" data-idx="8">
+        <video data-src="videos/13.mp4" muted loop playsinline preload="metadata"></video>
+        <div class="slide-caption">
+          <a class="cap-label" href="https://suki-systems.com" target="_blank" rel="noopener">Suki Systems <em>· Meta Ads</em></a>
+          <span class="cap-sub">Denim · autumn drop · 09 / 18</span>
+        </div>
+      </article>
+
+      <article class="reel-slide" data-idx="9">
+        <video data-src="videos/9.mp4" muted loop playsinline preload="metadata"></video>
+        <div class="slide-caption">
+          <a class="cap-label" href="https://www.instagram.com/cleo.courtside/" target="_blank" rel="noopener">@cleo.courtside <em>· Athleisure</em></a>
+          <span class="cap-sub">Lifestyle · harvest tones · 10 / 18</span>
+        </div>
+      </article>
+
+      <article class="reel-slide" data-idx="10">
+        <video data-src="videos/18.mp4" muted loop playsinline preload="metadata"></video>
+        <div class="slide-caption">
+          <a class="cap-label" href="https://www.instagram.com/cleo.courtside/" target="_blank" rel="noopener">@cleo.courtside <em>· Athleisure</em></a>
+          <span class="cap-sub">Lifestyle reel · 11 / 18</span>
+        </div>
+      </article>
+
+      <article class="reel-slide" data-idx="11">
+        <video data-src="videos/12.mp4" muted loop playsinline preload="metadata"></video>
+        <div class="slide-caption">
+          <a class="cap-label" href="https://suki-systems.com" target="_blank" rel="noopener">Suki Systems <em>· Meta Ads</em></a>
+          <span class="cap-sub">Outerwear · fall layering · 12 / 18</span>
+        </div>
+      </article>
+
+      <article class="reel-slide" data-idx="12">
+        <video data-src="videos/8.mp4" muted loop playsinline preload="metadata"></video>
+        <div class="slide-caption">
+          <a class="cap-label" href="https://www.instagram.com/cleo.courtside/" target="_blank" rel="noopener">@cleo.courtside <em>· Lifestyle</em></a>
+          <span class="cap-sub">Skincare · apothecary fall · 13 / 18</span>
+        </div>
+      </article>
+
+      <article class="reel-slide" data-idx="13">
+        <video data-src="videos/3.mp4" muted loop playsinline preload="metadata"></video>
+        <div class="slide-caption">
+          <a class="cap-label" href="https://suki-systems.com" target="_blank" rel="noopener">Suki Systems <em>· Creative</em></a>
+          <span class="cap-sub">Activewear · crisp run · 14 / 18</span>
+        </div>
+      </article>
+
+      <article class="reel-slide" data-idx="14">
+        <video data-src="videos/15.mp4" muted loop playsinline preload="metadata"></video>
+        <div class="slide-caption">
+          <a class="cap-label" href="https://suki-systems.com" target="_blank" rel="noopener">Suki Systems <em>· Meta Ads</em></a>
+          <span class="cap-sub">Boutique · autumn capsule · 15 / 18</span>
+        </div>
+      </article>
+
+      <article class="reel-slide" data-idx="15">
+        <video data-src="videos/6.mp4" muted loop playsinline preload="metadata"></video>
+        <div class="slide-caption">
+          <a class="cap-label" href="https://tres-well.com/" target="_blank" rel="noopener">Tres Well <em>· Supplements</em></a>
+          <span class="cap-sub">Workshop · process B-roll · 16 / 18</span>
+        </div>
+      </article>
+
+      <article class="reel-slide" data-idx="16">
+        <video data-src="videos/2.mp4" muted loop playsinline preload="metadata"></video>
+        <div class="slide-caption">
+          <a class="cap-label" href="https://suki-systems.com" target="_blank" rel="noopener">Suki Systems <em>· Creative</em></a>
+          <span class="cap-sub">Lifestyle · suburban fall · 17 / 18</span>
+        </div>
+      </article>
+
+      <article class="reel-slide" data-idx="17">
+        <video data-src="videos/10.mp4" muted loop playsinline preload="metadata"></video>
+        <div class="slide-caption">
+          <a class="cap-label" href="https://www.instagram.com/cleo.courtside/" target="_blank" rel="noopener">@cleo.courtside <em>· Athleisure</em></a>
+          <span class="cap-sub">Apparel · crisp morning · 18 / 18</span>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- Marquee -->
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-inner">
+      <span>AI UGC</span><span><em>Meta Ads</em></span><span>Performance Creative</span><span><em>30-Day Pilots</em></span>
+      <span>AI UGC</span><span><em>Meta Ads</em></span><span>Performance Creative</span><span><em>30-Day Pilots</em></span>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <section class="cta" id="contact">
+    <div class="cta-inner">
+      <div class="cta-eyebrow">Roll credits</div>
+      <h2 class="cta-title">Say <em>hello.</em></h2>
+      <p class="cta-line">Tell us what you're working on. <em>We'll get back within 24 hours.</em></p>
+
+      <form class="cta-form" id="contactForm" novalidate>
+
+        <div class="field-row">
+          <label class="field">
+            <span class="field-label">Name *</span>
+            <input type="text" name="name" required autocomplete="name" />
+          </label>
+          <label class="field">
+            <span class="field-label">Company</span>
+            <input type="text" name="company" autocomplete="organization" />
+          </label>
+        </div>
+        <div class="field-row">
+          <label class="field">
+            <span class="field-label">Email *</span>
+            <input type="email" name="email" required autocomplete="email" />
+          </label>
+          <label class="field">
+            <span class="field-label">Phone *</span>
+            <div class="phone-row">
+              <select id="studioPhonePrefix" class="phone-prefix">
+                <option value="+972">🇮🇱 +972</option>
+                <option value="+1">🇺🇸 +1</option>
+                <option value="+44">🇬🇧 +44</option>
+                <option value="+61">🇦🇺 +61</option>
+                <option value="+1-CA">🇨🇦 +1</option>
+                <option value="+971">🇦🇪 +971</option>
+                <option value="+49">🇩🇪 +49</option>
+                <option value="+33">🇫🇷 +33</option>
+                <option value="+31">🇳🇱 +31</option>
+                <option value="+34">🇪🇸 +34</option>
+                <option value="+39">🇮🇹 +39</option>
+                <option value="+41">🇨🇭 +41</option>
+                <option value="+46">🇸🇪 +46</option>
+                <option value="+47">🇳🇴 +47</option>
+                <option value="+45">🇩🇰 +45</option>
+                <option value="+48">🇵🇱 +48</option>
+                <option value="+27">🇿🇦 +27</option>
+                <option value="+20">🇪🇬 +20</option>
+                <option value="+966">🇸🇦 +966</option>
+                <option value="+965">🇰🇼 +965</option>
+                <option value="+974">🇶🇦 +974</option>
+                <option value="+91">🇮🇳 +91</option>
+                <option value="+65">🇸🇬 +65</option>
+              </select>
+              <input type="tel" id="studioPhoneNumber" name="phone_number" placeholder="412 345 678" required />
+            </div>
+          </label>
+        </div>
+        <label class="field">
+          <span class="field-label">Website</span>
+          <input type="url" name="website" autocomplete="url" placeholder="https://yourbrand.com" />
+        </label>
+        <label class="field">
+          <span class="field-label">What you're after *</span>
+          <textarea name="message" rows="3" required></textarea>
+        </label>
+
+        <div class="form-foot">
+          <p class="form-hint">30-day pilot from AUD&nbsp;$2,500.<br/>Or just say hi.</p>
+          <button type="submit" class="cta-btn">
+            <span>Send</span>
+            <span class="arrow">→</span>
+          </button>
+        </div>
+      </form>
+
+      <div class="form-thanks" id="formThanks" hidden>
+        <em>Thanks.</em><br/>We'll be in touch within 24&nbsp;hours.
+      </div>
+
+      <div class="credits">
+        <div>Co-Founders &nbsp;·&nbsp; <span>Yali Reichental &amp; Gil Truman</span></div>
+        <div>Studio &nbsp;·&nbsp; <span>Perth, Western Australia</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="col">
+      <strong>Suki Studios</strong>
+      A division of Suki Systems
+    </div>
+    <div class="col center">
+      © MMXXVI · All rights reserved
+    </div>
+    <div class="col right">
+      <strong>Perth, WA</strong>
+      <a href="#contact">Say hello →</a>
+    </div>
+  </footer>
+
+  <script>
+    const reelCol = document.getElementById('reelColumn');
+    const slides = Array.from(reelCol.querySelectorAll('.reel-slide'));
+    const videos = slides.map(s => s.querySelector('video'));
+    const pipsEl = document.getElementById('pips');
+
+    /* ----- Custom RAF smooth scroll (consistent timing across browsers) ----- */
+    let scrollAnimRaf = 0;
+    function smoothScrollTo(target, duration = 380) {
+      cancelAnimationFrame(scrollAnimRaf);
+      const start = reelCol.scrollTop;
+      const change = target - start;
+      if (Math.abs(change) < 1) return;
+      const startTime = performance.now();
+      const ease = (t) => t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2;
+      function step(now) {
+        const t = Math.min(1, (now - startTime) / duration);
+        reelCol.scrollTop = start + change * ease(t);
+        if (t < 1) scrollAnimRaf = requestAnimationFrame(step);
+      }
+      scrollAnimRaf = requestAnimationFrame(step);
+    }
+
+    /* ----- Sliding window: only 3 videos hold src at once (current ± 1) ----- */
+    function manageSrc(idx) {
+      videos.forEach((v, i) => {
+        if (!v) return;
+        const dist = Math.abs(i - idx);
+        if (dist <= 1) {
+          if (!v.src && v.dataset.src) {
+            v.src = v.dataset.src;
+            v.preload = 'auto';
+            v.load();
+          }
+        } else if (dist > 2) {
+          if (v.src) {
+            v.pause();
+            v.removeAttribute('src');
+            v.load(); // releases decoder
+          }
+        }
+      });
+    }
+    manageSrc(0);
+
+    /* ----- Pips ----- */
+    slides.forEach((sec, i) => {
+      const b = document.createElement('button');
+      b.className = 'pip';
+      b.setAttribute('aria-label', `Go to slide ${i + 1}`);
+      b.addEventListener('click', () => smoothScrollTo(i * reelCol.clientHeight));
+      pipsEl.appendChild(b);
+    });
+    const pipEls = Array.from(pipsEl.querySelectorAll('.pip'));
+
+    /* ----- Feed counter ----- */
+    const feedCurrent = document.getElementById('feedCurrent');
+    const feedTotal = document.getElementById('feedTotal');
+    feedTotal.textContent = String(slides.length).padStart(2, '0');
+
+    /* ----- Audio state ----- */
+    let soundOn = false;
+    let activeIdx = 0;
+    const soundToggle = document.getElementById('soundToggle');
+
+    function syncAudio() {
+      videos.forEach((v, i) => {
+        if (!v) return;
+        if (i === activeIdx && soundOn) {
+          v.muted = false;
+          v.volume = 1;
+        } else {
+          v.muted = true;
+        }
+      });
+    }
+
+    soundToggle.addEventListener('click', async () => {
+      soundOn = !soundOn;
+      soundToggle.setAttribute('data-on', soundOn);
+      soundToggle.setAttribute('aria-label', soundOn ? 'Turn sound off' : 'Turn sound on');
+      syncAudio();
+      // ensure the active video is actually playing (counts as user gesture)
+      const active = videos[activeIdx];
+      if (active) {
+        try { await active.play(); } catch (err) { /* ignore */ }
+      }
+    });
+
+    function preloadAround(idx) { manageSrc(idx); }
+
+    /* ----- Split: cheap updates per-frame, heavy video work on scroll-end ----- */
+    function setActiveLight(idx) {
+      if (idx === activeIdx) return;
+      activeIdx = idx;
+      pipEls.forEach((p, i) => p.classList.toggle('is-active', i === idx));
+      feedCurrent.textContent = String(idx + 1).padStart(2, '0');
+    }
+
+    function setActiveFull(idx) {
+      // single active video — keeps GPU/CPU focused on what's on screen
+      videos.forEach((v, i) => {
+        if (!v || !v.src) return;
+        if (i === idx) {
+          v.muted = !soundOn;
+          v.play().catch(() => {});
+        } else {
+          v.pause();
+        }
+      });
+      syncAudio();
+      preloadAround(idx);
+    }
+
+    setActiveLight(0);
+    setActiveFull(0);
+    pipEls[0].classList.add('is-active');
+
+    /* ----- Scroll listener: light during, heavy after ----- */
+    let scrollRaf = 0;
+    let scrollEndTimer = 0;
+    let scrollActionsTimer = 0;
+    function onReelScroll() {
+      // pause grain animation while user is actively scrolling
+      if (!body.classList.contains('is-scrolling')) body.classList.add('is-scrolling');
+      clearTimeout(scrollEndTimer);
+      scrollEndTimer = setTimeout(() => body.classList.remove('is-scrolling'), 180);
+
+      // light update (pip + counter) on rAF
+      if (!scrollRaf) {
+        scrollRaf = requestAnimationFrame(() => {
+          scrollRaf = 0;
+          const slideH = reelCol.clientHeight;
+          if (!slideH) return;
+          const idx = Math.round(reelCol.scrollTop / slideH);
+          if (idx >= 0 && idx < slides.length) setActiveLight(idx);
+        });
+      }
+
+      // heavy work (play/pause/preload) only after scroll settles
+      clearTimeout(scrollActionsTimer);
+      scrollActionsTimer = setTimeout(() => setActiveFull(activeIdx), 140);
+    }
+    reelCol.addEventListener('scroll', onReelScroll, { passive: true });
+
+    /* ----- Custom wheel handler for desktop: one tick = one reel ----- */
+    if (window.matchMedia('(pointer: fine)').matches) {
+      let wheelLocked = false;
+      let wheelUnlockTimer = 0;
+      reelCol.addEventListener('wheel', (e) => {
+        const atTop = activeIdx === 0;
+        const atBottom = activeIdx === slides.length - 1;
+        // Let the page handle scroll at the edges
+        if ((atTop && e.deltaY < 0) || (atBottom && e.deltaY > 0)) return;
+        e.preventDefault();
+        if (wheelLocked) return;
+        if (Math.abs(e.deltaY) < 6) return;
+        wheelLocked = true;
+        const dir = e.deltaY > 0 ? 1 : -1;
+        const next = Math.max(0, Math.min(slides.length - 1, activeIdx + dir));
+        smoothScrollTo(next * reelCol.clientHeight);
+        clearTimeout(wheelUnlockTimer);
+        wheelUnlockTimer = setTimeout(() => { wheelLocked = false; }, 400);
+      }, { passive: false });
+    }
+
+    /* ----- Scroll progress (page-level) ----- */
+    const progress = document.getElementById('progress');
+    function updateProgress() {
+      const h = document.documentElement;
+      const pct = (h.scrollTop / Math.max(1, h.scrollHeight - h.clientHeight)) * 100;
+      progress.style.width = pct + '%';
+    }
+    window.addEventListener('scroll', updateProgress, { passive: true });
+    updateProgress();
+
+    /* ----- Tap video to pause/resume ----- */
+    videos.forEach(v => {
+      if (!v) return;
+      v.addEventListener('click', () => {
+        if (v.paused) v.play().catch(() => {}); else v.pause();
+      });
+    });
+
+    /* ----- Drawer / hamburger ----- */
+    const body = document.body;
+    const hamburger = document.getElementById('hamburger');
+    const backdrop = document.getElementById('backdrop');
+    const drawer = document.querySelector('.drawer');
+    function toggleMenu(open) {
+      const next = open ?? !body.classList.contains('menu-open');
+      body.classList.toggle('menu-open', next);
+      hamburger.setAttribute('aria-expanded', next);
+      hamburger.setAttribute('aria-label', next ? 'Close menu' : 'Open menu');
+      drawer.setAttribute('aria-hidden', !next);
+    }
+    hamburger.addEventListener('click', () => toggleMenu());
+    backdrop.addEventListener('click', () => toggleMenu(false));
+
+    document.querySelectorAll('.drawer nav button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const action = btn.dataset.action;
+        toggleMenu(false);
+        if (action === 'contact') {
+          setTimeout(() => document.getElementById('contact').scrollIntoView({ behavior: 'smooth' }), 220);
+        } else if (action === 'about') {
+          setTimeout(() => toggleAbout(true), 260);
+        }
+      });
+    });
+
+    /* ----- About ----- */
+    const aboutEl = document.getElementById('about');
+    const aboutClose = document.getElementById('aboutClose');
+    function toggleAbout(open) {
+      const next = open ?? !body.classList.contains('about-open');
+      body.classList.toggle('about-open', next);
+      aboutEl.setAttribute('aria-hidden', !next);
+    }
+    aboutClose.addEventListener('click', () => toggleAbout(false));
+    aboutEl.addEventListener('click', e => { if (e.target.id === 'about') toggleAbout(false); });
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') { toggleMenu(false); toggleAbout(false); }
+    });
+
+    /* ----- Keyboard nav inside the reel ----- */
+    document.addEventListener('keydown', e => {
+      if (body.classList.contains('menu-open') || body.classList.contains('about-open')) return;
+      // only operate on reel if hero is in view
+      const heroRect = document.getElementById('reel').getBoundingClientRect();
+      if (heroRect.bottom < 100) return; // hero off screen, let page nav handle
+      if (e.key === 'ArrowDown' || e.key === 'PageDown') {
+        e.preventDefault();
+        smoothScrollTo(Math.min(activeIdx + 1, slides.length - 1) * reelCol.clientHeight);
+      } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+        e.preventDefault();
+        smoothScrollTo(Math.max(activeIdx - 1, 0) * reelCol.clientHeight);
+      }
+    });
+
+    /* ----- Contact form submission → /api/contact-studios ----- */
+    const contactForm = document.getElementById('contactForm');
+    const formThanks = document.getElementById('formThanks');
+    if (contactForm) {
+      contactForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitBtn = contactForm.querySelector('button[type="submit"]');
+        if (submitBtn) submitBtn.disabled = true;
+        const prefix = (document.getElementById('studioPhonePrefix').value || '').replace('-CA', '');
+        const phoneNum = (document.getElementById('studioPhoneNumber').value || '').trim().replace(/^0+/, '');
+        const phone = phoneNum ? prefix + phoneNum : '';
+        try {
+          await fetch('/api/contact-studios', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name:    contactForm.querySelector('[name="name"]').value.trim(),
+              company: contactForm.querySelector('[name="company"]').value.trim(),
+              email:   contactForm.querySelector('[name="email"]').value.trim(),
+              phone,
+              website: contactForm.querySelector('[name="website"]').value.trim(),
+              message: contactForm.querySelector('[name="message"]').value.trim(),
+            }),
+          });
+        } catch (err) { /* fall through */ }
+        contactForm.hidden = true;
+        formThanks.hidden = false;
+      });
+    }
+
+    /* ----- Auto-select phone prefix from timezone ----- */
+    (function () {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+      const map = {
+        'Asia/Jerusalem': '+972', 'Asia/Tel_Aviv': '+972',
+        'America/New_York': '+1', 'America/Chicago': '+1', 'America/Los_Angeles': '+1', 'America/Denver': '+1',
+        'Europe/London': '+44',
+        'Australia/Sydney': '+61', 'Australia/Melbourne': '+61', 'Australia/Perth': '+61',
+        'Asia/Dubai': '+971',
+        'Europe/Berlin': '+49', 'Europe/Paris': '+33', 'Europe/Amsterdam': '+31',
+      };
+      const val = map[tz];
+      if (val) {
+        const sel = document.getElementById('studioPhonePrefix');
+        if (sel) sel.value = val;
+      }
+    })();
+  </script>
+</body>
+</html>
