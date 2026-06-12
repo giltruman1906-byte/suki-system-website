@@ -9,9 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900,0..100;1,9..144,300..900,0..100&family=JetBrains+Mono:wght@300;400;500&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  <!-- eager-prefetch the first reel so it's cached before JS even runs -->
-  <link rel="preconnect" href="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com" crossorigin />
-  <link rel="preload" as="video" href="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/videos/17.mp4" type="video/mp4" />
+  <!-- no crossorigin: video/poster fetches are no-cors and use the non-CORS connection pool -->
+  <link rel="preconnect" href="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com" />
   <style>
     :root {
       --ink: #0a0908;
@@ -580,6 +579,26 @@
     .slide-caption { pointer-events: none; }
     .slide-caption a.cap-label { pointer-events: auto; }
 
+    /* tap-to-play affordance when autoplay is blocked (e.g. iOS Low Power Mode) */
+    .tap-play {
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      width: 72px;
+      height: 72px;
+      background: rgba(10, 9, 8, 0.65);
+      border: 1px solid var(--bone-soft);
+      border-radius: 50%;
+      color: var(--bone);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      z-index: 7;
+      transition: border-color 0.3s var(--ease), transform 0.3s var(--ease);
+    }
+    .tap-play:hover { border-color: var(--rec); transform: scale(1.06); }
+    .tap-play svg { width: 28px; height: 28px; margin-left: 3px; }
+
     /* GPU promotion for smoother scroll + video composite */
     .reel-slide { will-change: transform; }
     .reel-slide video { transform: translateZ(0); -webkit-transform: translateZ(0); backface-visibility: hidden; }
@@ -943,7 +962,7 @@
     <div class="reel-column" id="reelColumn">
 
       <article class="reel-slide" data-idx="1">
-        <video id="firstVid" src="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/videos/17.mp4" autoplay muted loop playsinline preload="auto"></video>
+        <video id="firstVid" src="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/videos/17.mp4" poster="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/posters/17.webp" autoplay muted loop playsinline preload="auto"></video>
         <div class="hero-overlay">
           <p class="tagline">
             AI UGC + Meta Ads performance creative.<br/>
@@ -954,7 +973,7 @@
       </article>
 
       <article class="reel-slide" data-idx="2">
-        <video src="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/videos/5.mp4" muted loop playsinline preload="auto"></video>
+        <video src="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/videos/5s.mp4" poster="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/posters/5.webp" muted loop playsinline preload="metadata"></video>
         <div class="slide-caption">
           <a class="cap-label" href="https://kivanacollective.com/" target="_blank" rel="noopener">Kivana Collective <em>· Underwear</em></a>
           <span class="cap-sub">Editorial · autumn fashion · 02 / 18</span>
@@ -962,7 +981,7 @@
       </article>
 
       <article class="reel-slide" data-idx="3">
-        <video src="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/videos/11.mp4" muted loop playsinline preload="metadata"></video>
+        <video src="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/videos/11.mp4" poster="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/posters/11.webp" muted loop playsinline preload="none"></video>
         <div class="slide-caption">
           <a class="cap-label" href="https://suki-systems.com" target="_blank" rel="noopener">Suki Systems <em>· Meta Ads</em></a>
           <span class="cap-sub">AI avatar campaign · 03 / 18</span>
@@ -970,7 +989,7 @@
       </article>
 
       <article class="reel-slide" data-idx="3">
-        <video src="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/videos/4.mp4" muted loop playsinline preload="metadata"></video>
+        <video src="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/videos/4s.mp4" poster="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/posters/4.webp" muted loop playsinline preload="none"></video>
         <div class="slide-caption">
           <a class="cap-label" href="https://suki-systems.com" target="_blank" rel="noopener">Suki Systems <em>· Creative</em></a>
           <span class="cap-sub">Cafe · morning amber · 04 / 18</span>
@@ -978,7 +997,7 @@
       </article>
 
       <article class="reel-slide" data-idx="4">
-        <video src="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/videos/14.mp4" muted loop playsinline preload="metadata"></video>
+        <video src="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/videos/14.mp4" poster="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/posters/14.webp" muted loop playsinline preload="none"></video>
         <div class="slide-caption">
           <a class="cap-label" href="https://suki-systems.com" target="_blank" rel="noopener">Suki Systems <em>· UGC</em></a>
           <span class="cap-sub">Trades · service B2B · 05 / 18</span>
@@ -986,7 +1005,7 @@
       </article>
 
       <article class="reel-slide" data-idx="5">
-        <video src="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/videos/7.mp4" muted loop playsinline preload="metadata"></video>
+        <video src="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/videos/7s.mp4" poster="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/posters/7.webp" muted loop playsinline preload="none"></video>
         <div class="slide-caption">
           <a class="cap-label" href="https://clockin-scheduler.com/" target="_blank" rel="noopener">Clockin <em>· Rostering app</em></a>
           <span class="cap-sub">Hospitality · fall menu · 06 / 18</span>
@@ -994,7 +1013,7 @@
       </article>
 
       <article class="reel-slide" data-idx="6">
-        <video src="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/videos/16.mp4" muted loop playsinline preload="metadata"></video>
+        <video src="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/videos/16.mp4" poster="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/posters/16.webp" muted loop playsinline preload="none"></video>
         <div class="slide-caption">
           <a class="cap-label" href="https://suki-systems.com" target="_blank" rel="noopener">Suki Systems <em>· Meta Ads</em></a>
           <span class="cap-sub">Activewear · fall campaign · 07 / 18</span>
@@ -1002,7 +1021,7 @@
       </article>
 
       <article class="reel-slide" data-idx="7">
-        <video src="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/videos/1.mp4" muted loop playsinline preload="metadata"></video>
+        <video src="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/videos/1s.mp4" poster="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/posters/1.webp" muted loop playsinline preload="none"></video>
         <div class="slide-caption">
           <a class="cap-label" href="https://suki-systems.com" target="_blank" rel="noopener">Suki Systems <em>· Creative</em></a>
           <span class="cap-sub">House origin · first cut · 08 / 18</span>
@@ -1010,7 +1029,7 @@
       </article>
 
       <article class="reel-slide" data-idx="8">
-        <video src="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/videos/13.mp4" muted loop playsinline preload="metadata"></video>
+        <video src="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/videos/13.mp4" poster="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/posters/13.webp" muted loop playsinline preload="none"></video>
         <div class="slide-caption">
           <a class="cap-label" href="https://suki-systems.com" target="_blank" rel="noopener">Suki Systems <em>· Meta Ads</em></a>
           <span class="cap-sub">Denim · autumn drop · 09 / 18</span>
@@ -1018,7 +1037,7 @@
       </article>
 
       <article class="reel-slide" data-idx="9">
-        <video src="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/videos/9.mp4" muted loop playsinline preload="metadata"></video>
+        <video src="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/videos/9.mp4" poster="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/posters/9.webp" muted loop playsinline preload="none"></video>
         <div class="slide-caption">
           <a class="cap-label" href="https://www.instagram.com/cleo.courtside/" target="_blank" rel="noopener">@cleo.courtside <em>· Athleisure</em></a>
           <span class="cap-sub">Lifestyle · harvest tones · 10 / 18</span>
@@ -1026,7 +1045,7 @@
       </article>
 
       <article class="reel-slide" data-idx="10">
-        <video src="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/videos/18.mp4" muted loop playsinline preload="metadata"></video>
+        <video src="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/videos/18.mp4" poster="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/posters/18.webp" muted loop playsinline preload="none"></video>
         <div class="slide-caption">
           <a class="cap-label" href="https://www.instagram.com/cleo.courtside/" target="_blank" rel="noopener">@cleo.courtside <em>· Athleisure</em></a>
           <span class="cap-sub">Lifestyle reel · 11 / 18</span>
@@ -1034,7 +1053,7 @@
       </article>
 
       <article class="reel-slide" data-idx="11">
-        <video src="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/videos/12.mp4" muted loop playsinline preload="metadata"></video>
+        <video src="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/videos/12.mp4" poster="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/posters/12.webp" muted loop playsinline preload="none"></video>
         <div class="slide-caption">
           <a class="cap-label" href="https://suki-systems.com" target="_blank" rel="noopener">Suki Systems <em>· Meta Ads</em></a>
           <span class="cap-sub">Outerwear · fall layering · 12 / 18</span>
@@ -1042,7 +1061,7 @@
       </article>
 
       <article class="reel-slide" data-idx="12">
-        <video src="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/videos/8.mp4" muted loop playsinline preload="metadata"></video>
+        <video src="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/videos/8.mp4" poster="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/posters/8.webp" muted loop playsinline preload="none"></video>
         <div class="slide-caption">
           <a class="cap-label" href="https://www.instagram.com/cleo.courtside/" target="_blank" rel="noopener">@cleo.courtside <em>· Lifestyle</em></a>
           <span class="cap-sub">Skincare · apothecary fall · 13 / 18</span>
@@ -1050,7 +1069,7 @@
       </article>
 
       <article class="reel-slide" data-idx="13">
-        <video src="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/videos/3.mp4" muted loop playsinline preload="metadata"></video>
+        <video src="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/videos/3s.mp4" poster="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/posters/3.webp" muted loop playsinline preload="none"></video>
         <div class="slide-caption">
           <a class="cap-label" href="https://suki-systems.com" target="_blank" rel="noopener">Suki Systems <em>· Creative</em></a>
           <span class="cap-sub">Activewear · crisp run · 14 / 18</span>
@@ -1058,7 +1077,7 @@
       </article>
 
       <article class="reel-slide" data-idx="14">
-        <video src="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/videos/15.mp4" muted loop playsinline preload="metadata"></video>
+        <video src="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/videos/15.mp4" poster="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/posters/15.webp" muted loop playsinline preload="none"></video>
         <div class="slide-caption">
           <a class="cap-label" href="https://suki-systems.com" target="_blank" rel="noopener">Suki Systems <em>· Meta Ads</em></a>
           <span class="cap-sub">Boutique · autumn capsule · 15 / 18</span>
@@ -1066,7 +1085,7 @@
       </article>
 
       <article class="reel-slide" data-idx="15">
-        <video src="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/videos/6.mp4" muted loop playsinline preload="metadata"></video>
+        <video src="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/videos/6.mp4" poster="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/posters/6.webp" muted loop playsinline preload="none"></video>
         <div class="slide-caption">
           <a class="cap-label" href="https://tres-well.com/" target="_blank" rel="noopener">Tres Well <em>· Supplements</em></a>
           <span class="cap-sub">Workshop · process B-roll · 16 / 18</span>
@@ -1074,7 +1093,7 @@
       </article>
 
       <article class="reel-slide" data-idx="16">
-        <video src="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/videos/2.mp4" muted loop playsinline preload="metadata"></video>
+        <video src="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/videos/2s.mp4" poster="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/posters/2.webp" muted loop playsinline preload="none"></video>
         <div class="slide-caption">
           <a class="cap-label" href="https://suki-systems.com" target="_blank" rel="noopener">Suki Systems <em>· Creative</em></a>
           <span class="cap-sub">Lifestyle · suburban fall · 17 / 18</span>
@@ -1082,7 +1101,7 @@
       </article>
 
       <article class="reel-slide" data-idx="17">
-        <video src="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/videos/10.mp4" muted loop playsinline preload="metadata"></video>
+        <video src="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/videos/10.mp4" poster="https://e2jfdfsxlh8c7svu.public.blob.vercel-storage.com/posters/10.webp" muted loop playsinline preload="none"></video>
         <div class="slide-caption">
           <a class="cap-label" href="https://www.instagram.com/cleo.courtside/" target="_blank" rel="noopener">@cleo.courtside <em>· Athleisure</em></a>
           <span class="cap-sub">Apparel · crisp morning · 18 / 18</span>
@@ -1277,18 +1296,72 @@
       feedCurrent.textContent = String(idx + 1).padStart(2, '0');
     }
 
+    /* Warm the next reels only after the active one can play through —
+       never compete with the video the user is actually watching. */
+    function warmNeighbors(idx) {
+      [idx + 1, idx + 2].forEach(i => {
+        const v = videos[i];
+        if (!v || v.dataset.warmed || v.readyState > 0) return;
+        v.dataset.warmed = '1';
+        v.preload = 'auto';
+        try { v.load(); } catch (e) { /* ignore */ }
+      });
+    }
+    function warmAfterActive(idx) {
+      const v = videos[idx];
+      if (!v || v.readyState >= 3) { warmNeighbors(idx); return; }
+      v.addEventListener('canplaythrough', () => warmNeighbors(idx), { once: true });
+      setTimeout(() => warmNeighbors(idx), 4000); // fallback; warmNeighbors is idempotent
+    }
+
+    /* Low Power Mode / blocked autoplay: show a tap-to-play affordance
+       instead of a silently frozen poster. */
+    function showTapToPlay(idx) {
+      const slide = slides[idx];
+      if (!slide || slide.querySelector('.tap-play')) return;
+      const b = document.createElement('button');
+      b.className = 'tap-play';
+      b.type = 'button';
+      b.setAttribute('aria-label', 'Play video');
+      b.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
+      b.addEventListener('click', () => {
+        const v = videos[idx];
+        v.muted = !soundOn;
+        v.play().then(() => b.remove()).catch(() => {});
+      });
+      slide.appendChild(b);
+    }
+    function tryPlay(idx) {
+      const v = videos[idx];
+      if (!v) return;
+      v.play().then(() => {
+        const tp = slides[idx].querySelector('.tap-play');
+        if (tp) tp.remove();
+      }).catch((err) => {
+        if (!err || err.name !== 'NotAllowedError') return; // AbortError etc. are benign
+        if (!v.muted) {
+          // unmuted play needs a fresh gesture on iOS — retry muted
+          v.muted = true;
+          v.play().catch(() => showTapToPlay(idx));
+        } else {
+          showTapToPlay(idx);
+        }
+      });
+    }
+
     function setActiveFull(idx) {
       // single active video — keeps GPU/CPU focused on what's on screen
       videos.forEach((v, i) => {
         if (!v || !v.src) return;
         if (i === idx) {
           v.muted = !soundOn;
-          v.play().catch(() => {});
+          tryPlay(i);
         } else {
           v.pause();
         }
       });
       syncAudio();
+      warmAfterActive(idx);
     }
 
     setActiveLight(0);
