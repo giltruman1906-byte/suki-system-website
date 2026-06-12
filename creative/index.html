@@ -104,6 +104,24 @@
       margin-top: 8px;
     }
 
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+      font-family: var(--mono);
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.26em;
+      color: var(--bone-soft);
+      text-decoration: none;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.7);
+      transition: color 0.3s var(--ease);
+    }
+    .back-link .arr { transition: transform 0.3s var(--ease); }
+    .back-link:hover { color: var(--rec); }
+    .back-link:hover .arr { transform: translateX(-4px); }
+
     .top-right {
       display: flex;
       align-items: center;
@@ -177,6 +195,13 @@
       .wordmark { font-size: 18px; }
       .feed-counter { padding: 10px 12px; font-size: 9px; }
       .icon-btn { width: 40px; height: 40px; }
+    }
+    @media (max-width: 400px) {
+      .wordmark { font-size: 16px; }
+      .wordmark-sub { display: none; }
+      .back-link { margin-top: 9px; }
+      .top-right { gap: 8px; }
+      .feed-counter { padding: 9px 10px; gap: 7px; letter-spacing: 0.14em; }
     }
 
     /* ============================================================
@@ -257,14 +282,14 @@
     .drawer-meta::before { content: ''; width: 24px; height: 1px; background: var(--rec); }
 
     .drawer nav { display: flex; flex-direction: column; }
-    .drawer nav button {
+    .drawer nav button, .drawer nav a {
       all: unset;
       cursor: pointer;
       display: flex;
       align-items: baseline;
       gap: 18px;
       font-family: var(--display);
-      font-size: clamp(48px, 9vw, 80px);
+      font-size: clamp(40px, 9vw, 80px);
       font-weight: 300;
       letter-spacing: -0.025em;
       line-height: 1;
@@ -273,14 +298,14 @@
       border-bottom: 1px solid var(--bone-whisper);
       transition: color 0.4s, padding-left 0.55s var(--ease);
     }
-    .drawer nav button:first-child { border-top: 1px solid var(--bone-whisper); }
-    .drawer nav button:hover {
+    .drawer nav > :first-child { border-top: 1px solid var(--bone-whisper); }
+    .drawer nav button:hover, .drawer nav a:hover {
       color: var(--rec);
       padding-left: 20px;
       font-style: italic;
       font-variation-settings: "SOFT" 100;
     }
-    .drawer nav button .num {
+    .drawer nav .num {
       font-family: var(--mono);
       font-size: 10px;
       letter-spacing: 0.18em;
@@ -794,6 +819,9 @@
     .phone-row input { border-bottom: none; }
 
     @media (max-width: 560px) {
+      .cta { padding-top: 96px; }
+      .cta-title { font-size: clamp(48px, 17vw, 72px); }
+      .cta-eyebrow { margin-bottom: 32px; }
       .field-row { grid-template-columns: 1fr; gap: 22px; }
       .form-foot { flex-direction: column-reverse; align-items: stretch; gap: 20px; }
       .form-foot .cta-btn { justify-content: center; width: 100%; }
@@ -852,6 +880,7 @@
     <div class="wordmark">
       Suki <em>Studios</em>
       <span class="wordmark-sub">Est. MMXXVI · Perth WA</span>
+      <a class="back-link" href="https://suki-systems.com" aria-label="Back to Suki Systems"><span class="arr">←</span> Suki Systems</a>
     </div>
     <div class="top-right">
       <div class="feed-counter" id="feedCounter" aria-live="polite">
@@ -888,6 +917,7 @@
     <nav>
       <button type="button" data-action="contact"><span class="num">01</span>Contact</button>
       <button type="button" data-action="about"><span class="num">02</span>About</button>
+      <a href="https://suki-systems.com"><span class="num">03</span>Suki Systems</a>
     </nav>
     <div class="drawer-foot">
       <strong>Suki Studios</strong>
@@ -1159,7 +1189,7 @@
   <footer>
     <div class="col">
       <strong>Suki Studios</strong>
-      A division of Suki Systems
+      <a href="https://suki-systems.com">A division of Suki Systems →</a>
     </div>
     <div class="col center">
       © MMXXVI · All rights reserved

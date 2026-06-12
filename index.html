@@ -166,6 +166,7 @@
     .topbar-nav a { color: var(--ink); opacity: 0.6; transition: opacity 0.15s; }
     .topbar-nav a:hover { opacity: 1; }
     .topbar-right { justify-self: end; display: flex; align-items: center; gap: 14px; }
+    .btn .label-short { display: none; }
     .topbar-meta { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--steel); letter-spacing: 0.04em; display: inline-flex; align-items: center; gap: 8px; }
     .live-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--signal); box-shadow: 0 0 0 0 rgba(232, 90, 44, 0.6); animation: pulse 1.6s var(--ease) infinite; }
     @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(232, 90, 44, 0.55);} 70% { box-shadow: 0 0 0 8px rgba(232, 90, 44, 0);} 100% { box-shadow: 0 0 0 0 rgba(232, 90, 44, 0);} }
@@ -198,6 +199,7 @@
     .menu-primary li:nth-child(2) a { transition-delay: 0.09s; }
     .menu-primary li:nth-child(3) a { transition-delay: 0.14s; }
     .menu-primary li:nth-child(4) a { transition-delay: 0.19s; }
+    .menu-primary li:nth-child(5) a { transition-delay: 0.24s; }
     .menu-primary a:hover { color: rgba(245,242,236,0.6); }
     .menu-footer { display: flex; gap: 2rem; border-top: 1px solid var(--line-paper); padding-top: 1.25rem; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(245,242,236,0.5); letter-spacing: 0.06em; text-transform: uppercase; }
 
@@ -851,6 +853,10 @@
     }
     @media (max-width: 720px) {
       .page, .topbar-inner, .footer-row { padding-left: 24px; padding-right: 24px; }
+      .topbar-right { gap: 10px; }
+      .topbar-right .btn { font-size: 11px; padding: 10px 14px; }
+      .topbar-right .btn .label-full { display: none; }
+      .topbar-right .btn .label-short { display: inline; }
       .hero { padding: 56px 24px 48px; min-height: auto; }
       section.s, .intro, .hww, .contact, .team { padding: 64px 0; }
       .cases-header, .cases-cta { padding-left: 24px; padding-right: 24px; }
@@ -873,6 +879,9 @@
       .sc-stats > div:last-child { padding-right: 0; }
       .sc-stat-num { font-size: 17px; }
       .sc-stat-label { font-size: 9.5px; }
+    }
+    @media (max-width: 480px) {
+      .topbar-mark .wm-text { display: none; }
     }
 
   </style>
@@ -936,7 +945,7 @@
       </nav>
       <div class="topbar-right">
         <span class="topbar-meta" aria-label="Live"><span class="live-dot"></span></span>
-        <a class='btn btn-ink' href='/diagnostic'>Run My Company Diagnostic →</a>
+        <a class='btn btn-ink' href='/diagnostic'><span class="label-full">Run My Company Diagnostic →</span><span class="label-short">Diagnostic →</span></a>
         <button class="nav-burger" id="burger" aria-label="Open menu"><span></span><span></span><span></span></button>
       </div>
     </div>
@@ -1548,7 +1557,7 @@
         document.body.style.overflow = isOpen ? 'hidden' : '';
       });
     }
-    ['m1','m2','m3','m4'].forEach(id => {
+    ['m1','m2','m3','m4','m5'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.addEventListener('click', closeMenu);
     });
